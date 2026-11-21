@@ -8,6 +8,140 @@ native function calling and strict JSON-schema outputs. The original **LibreChat
 supported as a fallback provider; because it can't do function calling, the agent switches to a JSON action
 protocol there. Switch providers with `LLM_PROVIDER` in `.env`, or `--provider` on any script.
 
+## Diagrams
+
+A presentation-ready version of every diagram below, plus a waterfall of a real trace and the results
+scoreboard, is in **[`docs/diagrams.html`](docs/diagrams.html)**. Run `make diagrams` and use the arrow keys.
+
+### Architecture: what happens when a customer sends a message
+
+```mermaid
+flowchart LR
+  subgraph PIPE["Agent pipeline · every box becomes a span"]
+    direction TB
+    C(["Customer message"]):::io --> IG["Input guardrail<br/>redact card numbers · flag prompt injection"]:::guard
+    IG --> TR["Triage LLM<br/>intent · sentiment · urgency"]:::llm
+    TR --> AG{{"Agent loop · GPT-6.2 Sol<br/>decides which tools to call"}}:::agent
+    AG -- "tool_calls" --> TL["16 tools"]:::tool
+    TL -- "results" --> AG
+    TL --> SV[("Simulated services<br/>orders · payments · CRM<br/>inventory · 5 carriers")]:::svc
+    TL --> KB[("Policy knowledge base<br/>embed → retrieve → rerank")]:::svc
+    AG --> OG["Output guardrail<br/>blocks other customers' data"]:::guard
+    OG --> R(["Reply to customer"]):::io
+    OG --> CN["CRM-note LLM<br/>summary for the human team"]:::llm
+  end
+  subgraph PX["Arize Phoenix"]
+    direction TB
+    P1["Traces and sessions"]:::px ~~~ P2["Datasets and experiments"]:::px ~~~ P3["Annotations<br/>from online evals"]:::px ~~~ P4["Prompt versions"]:::px
+  end
+  PIPE == "OpenTelemetry spans" ==> PX
+  classDef io stroke:#8a94a6,stroke-width:2px
+  classDef guard stroke:#d6409f,stroke-width:2px
+  classDef llm stroke:#e08a00,stroke-width:2px
+  classDef agent stroke:#6d4aff,stroke-width:2px
+  classDef tool stroke:#0f9f6e,stroke-width:2px
+  classDef svc stroke:#8a94a6,stroke-width:2px
+  classDef px stroke:#6d4aff,stroke-width:2px
+  classDef data stroke:#0c9aa6,stroke-width:2px
+  classDef note stroke:#aaaaaa,stroke-width:1px
+  classDef good stroke:#12a150,stroke-width:2px
+  classDef bad stroke:#d92d3a,stroke-width:2px
+```
+
+### One message, step by step (the live-demo conversation)
+
+```mermaid
+sequenceDiagram
+  actor U as Customer (Emma)
+  participant A as Agent pipeline
+  participant L as GPT-6.2 Sol
+  participant T as Tools / services
+  U->>A: Where is my desk? 3rd time asking
+  Note over A: input guardrail ✓ · triage LLM: intent, sentiment
+  A->>L: conversation + 16 tool schemas
+  L-->>A: 2 tool_calls at once
+  par in parallel
+    A->>T: get_customer_profile
+  and
+    A->>T: get_ticket_history (2 earlier tickets)
+  end
+  L-->>A: tool_call lookup_order
+  A->>T: lookup_order (shipped, DHL)
+  L-->>A: tool_call track_shipment
+  A->>T: track_shipment
+  Note over T: DHL API: 504 timeout (2.4 s) → retry → 200
+  T-->>A: scans: customs, Stockholm · ETA Nov 24
+  L-->>A: final reply
+  Note over A: output guardrail ✓ · CRM-note LLM
+  A-->>U: Sorry you had to ask 3 times… ETA Nov 24
+```
+
+### How an experiment scores the agent (offline evals)
+
+```mermaid
+flowchart TB
+  subgraph IN["1 · Test cases"]
+    direction LR
+    DS[("Golden dataset<br/>34 cases · 7 categories")]:::data --- CASE["Each case defines: reference answer · expected / forbidden tools<br/>should_escalate · must / must-not mention"]:::note
+  end
+  subgraph RUNS["2 · Run and score every case"]
+    direction LR
+    RUN["Run the agent"]:::agent --> OUT["Answer +<br/>full trace"]:::io
+    OUT --> CODE["6 code evaluators<br/>tool_recall · forbidden_tools · escalation<br/>key_facts · privacy_guard · protocol"]:::tool
+    OUT --> JUDGE["3 LLM judges<br/>correctness · groundedness · tone"]:::llm
+  end
+  subgraph DEC["3 · Decide"]
+    direction LR
+    EXP["Phoenix experiment<br/>score + explanation per case"]:::px --> CMP{{"Compare versions<br/>v1 vs v2 · LibreChat vs Sol"}}:::agent
+    CMP -- "better on every slice" --> SHIP(["Ship"]):::good
+    CMP -- "a slice got worse" --> FIX(["Fix and re-run"]):::bad
+  end
+  IN --> RUNS --> DEC
+  classDef io stroke:#8a94a6,stroke-width:2px
+  classDef guard stroke:#d6409f,stroke-width:2px
+  classDef llm stroke:#e08a00,stroke-width:2px
+  classDef agent stroke:#6d4aff,stroke-width:2px
+  classDef tool stroke:#0f9f6e,stroke-width:2px
+  classDef svc stroke:#8a94a6,stroke-width:2px
+  classDef px stroke:#6d4aff,stroke-width:2px
+  classDef data stroke:#0c9aa6,stroke-width:2px
+  classDef note stroke:#aaaaaa,stroke-width:1px
+  classDef good stroke:#12a150,stroke-width:2px
+  classDef bad stroke:#d92d3a,stroke-width:2px
+```
+
+### The improvement loop (online evals feed the golden dataset)
+
+```mermaid
+flowchart TB
+  subgraph BEFORE["Before release · offline"]
+    direction LR
+    CH["Change something<br/>prompt · tools · model"]:::agent --> EX["Offline experiment<br/>34 golden cases"]:::px
+    EX --> CP{{"Better on every slice?<br/>no → change again"}}:::agent
+    CP -- "yes" --> SH(["Ship"]):::good
+  end
+  subgraph AFTER["After release · online"]
+    direction LR
+    PR["Production traffic<br/>every turn traced"]:::io --> OE["Online evals<br/>groundedness 0.86 · resolution 0.94<br/>tone 0.96 · privacy 1.00"]:::llm
+    OE --> FL["Flagged trace<br/>e.g. hallucinated"]:::bad
+    FL --> AD["Add to dataset (one click)<br/>↺ becomes a golden case<br/>for the next experiment"]:::data
+  end
+  BEFORE == "ship" ==> AFTER
+  classDef io stroke:#8a94a6,stroke-width:2px
+  classDef guard stroke:#d6409f,stroke-width:2px
+  classDef llm stroke:#e08a00,stroke-width:2px
+  classDef agent stroke:#6d4aff,stroke-width:2px
+  classDef tool stroke:#0f9f6e,stroke-width:2px
+  classDef svc stroke:#8a94a6,stroke-width:2px
+  classDef px stroke:#6d4aff,stroke-width:2px
+  classDef data stroke:#0c9aa6,stroke-width:2px
+  classDef note stroke:#aaaaaa,stroke-width:1px
+  classDef good stroke:#12a150,stroke-width:2px
+  classDef bad stroke:#d92d3a,stroke-width:2px
+```
+
+### The trace: 9 span kinds
+
 One customer message produces one trace with 9 span kinds:
 
 ```

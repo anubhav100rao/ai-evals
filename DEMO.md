@@ -23,15 +23,36 @@ screen, and what to do **If it breaks**.
 
 | # | Section | Time | Screen |
 |---|---|---|---|
-| 1 | Hook: "agents fail quietly" | 1:30 | You / title slide |
-| 2 | The agent and its architecture | 2:00 | README diagram |
+| 1 | Hook: "agents fail quietly" | 1:30 | Deck slide 1 (title) |
+| 2 | The agent and its architecture | 2:00 | Deck slides 2–3 (architecture, step by step) |
 | 3 | Live demo: talk to the agent | 2:30 | Terminal |
-| 4 | Anatomy of one trace | 4:00 | Phoenix: trace view |
+| 4 | Anatomy of one trace | 4:00 | Phoenix trace view, then deck slide 4 (waterfall) |
 | 5 | Fleet view: filters, sessions, cost, prompts | 2:30 | Phoenix: project, Prompts |
-| 6 | Offline evals: dataset → experiments → 3 stories | 5:00 | Phoenix: Datasets, Compare |
-| 7 | Online evals on production traffic | 1:30 | Phoenix: project, annotations |
-| 8 | Lessons and close | 1:00 | You |
-| | **Q&A** | 5:00 | |
+| 6 | Offline evals: dataset → experiments → 3 stories | 5:00 | Deck slide 6, Phoenix Datasets and Compare, deck slide 7 |
+| 7 | Online evals on production traffic | 1:30 | Phoenix annotations, then deck slide 8 (loop) |
+| 8 | Lessons and close | 1:00 | Deck slide 1 (takeaways) |
+| | **Q&A** | 5:00 | Deck slide 5 (tools map) if asked |
+
+### The diagram deck (`docs/diagrams.html`)
+
+Your "slides" are a diagram deck you open in the browser with `make diagrams`. Arrow keys move between
+slides, **F** toggles fullscreen, and **◐** switches light/dark. The counter in the bottom-right shows the
+slide number used throughout this script:
+
+| Slide | Title | Use it in |
+|---|---|---|
+| 1 | See it, measure it, improve it (title + 3 takeaways) | Part 1 (open) and Part 8 (close) |
+| 2 | Architecture: what happens when a customer sends a message | Part 2 |
+| 3 | One message, step by step (sequence diagram of the live demo) | Part 2, optional |
+| 4 | Anatomy of a trace: **real waterfall** of the live-demo trace | Part 4 |
+| 5 | 16 tools grouped by what they touch | Q&A backup |
+| 6 | How an experiment scores the agent | Part 6b |
+| 7 | Results: 4 experiments, 3 stories | Part 6c and the stories |
+| 8 | Production failures become tomorrow's test cases (the loop) | Part 7 |
+
+The diagrams are drawn by Mermaid, which the page loads from a CDN, so **the deck needs internet**. Offline,
+slides 2, 3, 5, 6 and 8 show the diagram source text instead; slides 1, 4 and 7 work offline. Have a
+screenshot of each slide as a backup if the venue's Wi-Fi is unreliable.
 
 **Short on time (10-minute version):** do 1 → 3 → 4 (only the first five rows of its table) → 6
 (Story A only) → 8.
@@ -67,12 +88,17 @@ screen, and what to do **If it breaks**.
    ```
    You should see a friendly reply within about 10 seconds. If you see `402`/`401`, jump to the
    recovery playbook in Part C.
-3. **Browser: open these 4 tabs** on http://localhost:6006:
-   1. **Projects → `shopnova-support-prod`** (Spans tab)
-   2. **Datasets → `shopnova-support-golden` → Experiments**
-   3. **Prompts**
-   4. `README.md` rendered (GitHub or your editor's preview), scrolled to the trace diagram
-4. **Screen hygiene**
+3. **Terminal 3: start the diagram deck** (serves `docs/` and opens it in your browser):
+   ```bash
+   make diagrams
+   ```
+   Check that slide 2 shows a drawn diagram, not source text (see the internet note above).
+4. **Browser: arrange 4 tabs in this order**, so you can switch with Cmd+1…4:
+   1. **Diagram deck**: http://localhost:8765/diagrams.html, on slide 1
+   2. **Phoenix → Projects → `shopnova-support-prod`** (Spans tab)
+   3. **Phoenix → Datasets → `shopnova-support-golden` → Experiments**
+   4. **Phoenix → Prompts**
+5. **Screen hygiene**
    - Increase the font size: terminal around 18pt, browser zoom 125–150%.
    - Turn on Do Not Disturb, close Slack and email.
    - **Never open `.env` on screen.** It contains your API keys.
@@ -84,7 +110,7 @@ screen, and what to do **If it breaks**.
 
 ### 1. Hook: "agents fail quietly" (1:30)
 
-**Do:** Nothing on screen yet, or a title slide.
+**Do:** Deck tab, **slide 1** (title), fullscreen with **F**.
 
 **Say:**
 > "Here's a customer message: *'My glass lamp arrived smashed.'* Our AI agent replies politely,
@@ -104,7 +130,7 @@ screen, and what to do **If it breaks**.
 
 ### 2. The agent and its architecture (2:00)
 
-**Do:** Switch to the README tab, showing the trace diagram.
+**Do:** Press → to go to **slide 2** (Architecture).
 
 **Say:**
 > "This is **Nova**, a customer-support agent for a fictional online store, ShopNova. Everything here is
@@ -123,7 +149,11 @@ screen, and what to do **If it breaks**.
 > The tools call simulated backend services, so you'll see realistic latency, errors and retries.
 > And every box on this diagram becomes a **span** in Phoenix."
 
-**Point at:** the indented tree in the diagram; each indent level is a parent-child span.
+**Point at:** the box on the right, **Arize Phoenix**. Every stage on the left reports to it.
+
+**Optional (+30 s), slide 3 (step by step):**
+> "Here's what you're about to see live: one message, the model asking for two tools at once, the DHL
+> API failing once and recovering, then the reply. Keep this picture in mind for the live demo."
 
 **Transition:** "Enough diagrams. Let's talk to it."
 
@@ -168,7 +198,7 @@ Where exactly is my standing desk right now? This is the third time I'm asking.
 
 ### 4. Anatomy of one trace (4:00), the heart of the talk
 
-**Do:** Browser tab 1 (`shopnova-support-prod`). The newest trace is at the top of the Spans list; click it.
+**Do:** Browser tab 2 (`shopnova-support-prod`). The newest trace is at the top of the Spans list; click it.
 (Or paste the trace ID you copied into the URL: `…/spans/<trace-id>`.)
 
 **Say:**
@@ -197,6 +227,17 @@ spans. Filter `span_kind == 'RETRIEVER'`, open the first result, then click
 > rerank to the top 3. You can see exactly which documents the agent was grounded on, with scores before and
 > after reranking. When the agent quotes a wrong policy, this is where you look."
 
+**Do:** Switch to the deck tab, **slide 4** (Anatomy of a trace).
+
+**Say:**
+> "Phoenix shows the trace as a tree. Here's the *same* trace drawn as a timeline, with the real
+> timings. Three things jump out:
+> - **74% of the 14 seconds is LLM calls**: the orange bars. Tools and services take about a second.
+>   If you want this faster, a smaller model or fewer loop iterations will help; faster databases won't.
+> - **The red hatched bar is the DHL timeout**: 2.4 seconds, a sixth of the whole request, spent waiting for
+>   an API that then failed.
+> - **The two green bars at 4 seconds start together**: that's the parallel tool call."
+
 **Say (wrap-up):**
 > "So one message gave us 23 spans across 9 kinds of operation: agent, chain, LLM, tool, retriever,
 > embedding, reranker, guardrail and HTTP. Getting the LLM spans took **one line of code**:
@@ -209,7 +250,7 @@ interesting ones?"
 
 ### 5. Fleet view: filters, sessions, cost, prompts (2:30)
 
-**Do:** Close the trace drawer, back to the `shopnova-support-prod` span list. Type each filter into the filter
+**Do:** Back to Phoenix (tab 2), close the trace drawer to return to the `shopnova-support-prod` span list. Type each filter into the filter
 bar, press Enter, comment, then clear it.
 
 | Type this | Say |
@@ -227,7 +268,7 @@ bar, press Enter, comment, then clear it.
 > "Phoenix knows the model's price, so cost is tracked per span, trace and project. These ~40
 > production conversations cost about **30 cents** in total, under a cent each, with 5–7 LLM calls per message."
 
-**Do:** Browser tab 3, **Prompts**. Click `shopnova-support-agent`.
+**Do:** Browser tab 4, **Prompts**. Click `shopnova-support-agent`.
 > "Prompts are versioned too. v1 is tagged `baseline`, v2 is tagged `production`, and each version is
 > stored **together with its 16 tool definitions**. The triage prompt, the CRM prompt and all four judge
 > prompts live here too."
@@ -240,7 +281,7 @@ bar, press Enter, comment, then clear it.
 
 #### 6a. The golden dataset (45 s)
 
-**Do:** Browser tab 2: Datasets → `shopnova-support-golden` → **Examples** tab. Click any example, e.g. the one
+**Do:** Browser tab 3: Datasets → `shopnova-support-golden` → **Examples** tab. Click any example, e.g. the one
 whose message starts *"Hi, my Pulse Smartwatch…"* (`refund-03`).
 
 **Say:**
@@ -257,6 +298,9 @@ whose message starts *"Hi, my Pulse Smartwatch…"* (`refund-03`).
 
 #### 6b. Nine evaluators, two kinds (30 s)
 
+**Do:** Deck tab, **slide 6** (How an experiment scores the agent). Walk it top to bottom: test cases →
+run and score → decide.
+
 **Say:**
 > "Each run is scored by **nine evaluators**. Six are plain **code**: did it call the required tools? Did it
 > call a forbidden one? Did it escalate when it should? Are the key facts in the answer? Did it leak
@@ -268,12 +312,13 @@ whose message starts *"Hi, my Pulse Smartwatch…"* (`refund-03`).
 
 #### 6c. Compare the experiments (45 s)
 
-**Do:** Click the **Experiments** tab. Point at the **Annotation score comparison** chart at the top.
+**Do:** Deck, **slide 7** (Results): the scoreboard and the three stories on one screen. Then go to Phoenix tab
+3, **Experiments** tab, and point at the **Annotation score comparison** chart at the top.
 > "We ran the same 34 cases four times: two system prompts, **v1** a naive one-paragraph prompt and **v2**
 > a detailed operating procedure, on two setups: the original LibreChat endpoint, and GPT-6.2 Sol with
 > native tool calling."
 
-Show the scoreboard (or put it on a slide):
+The scoreboard (same numbers as deck slide 7; green = best in its group, red = the surprise):
 
 | evaluator | librechat v1 | librechat v2 | **sol v1** | **sol v2** |
 |---|---|---|---|---|
@@ -370,7 +415,7 @@ didn't. So we evaluate production too."
 
 ### 7. Online evals on production traffic (1:30)
 
-**Do:** Back to tab 1, `shopnova-support-prod`. Type this filter:
+**Do:** Phoenix tab 2, `shopnova-support-prod`. Type this filter:
 ```
 annotations['groundedness'].label == 'hallucinated'
 ```
@@ -385,7 +430,7 @@ Open the trace whose input is *"Is my chair stuck somewhere? Tracking hasn't cha
 > This one was flagged: the judge says the agent claimed something the tracking data didn't support.
 > Read the explanation." *(Read it out.)*
 
-**Point at:** the summary numbers (put these on a slide):
+**Point at:** the summary numbers (they're also on deck slide 8):
 
 | online eval (40 production turns) | mean |
 |---|---|
@@ -401,6 +446,11 @@ show it and cancel**.
 > we change the prompt, this exact failure is in the experiment. Production → dataset → experiment →
 > compare, all in one tool."
 
+**Do:** Deck, **slide 8** (the loop).
+> "Here's the whole system on one picture. The top row is before release: change something, run the
+> experiment, ship only if every slice is at least as good. The bottom row is after release: every
+> production turn is traced and scored, and flagged traces become golden cases. The loop never stops."
+
 **Optional, if asked about guardrails:**
 > "Our output guardrail would block a reply that leaked another customer's data. It never had to fire;
 > the filter `span_kind == 'GUARDRAIL' and status_code == 'ERROR'` returns nothing, because the model
@@ -411,7 +461,7 @@ show it and cancel**.
 
 ### 8. Lessons and close (1:00)
 
-**Do:** Back to you or a slide.
+**Do:** Deck, **slide 1** (press **Home**). The three takeaways are on screen while you close.
 
 **Say:**
 > "Five things I learned building this:
@@ -438,6 +488,8 @@ show it and cancel**.
 | `401` error | Use `make chat-librechat` | The key was revoked or rotated; update `.env` |
 | Phoenix page blank or "connection refused" | Terminal 1 → Ctrl+C → `make phoenix` again (about 10 s) | Data is safe in `~/.phoenix` |
 | Port 6006 already in use | Another Phoenix is already running; just use the browser | `lsof -i :6006` to find it |
+| Deck shows diagram source text instead of drawings | No internet (Mermaid loads from a CDN): show slides 1, 4 and 7, which work offline, or your backup screenshots | Reconnect and reload |
+| Port 8765 already in use | The deck server is already running: open http://localhost:8765/diagrams.html | `lsof -i :8765` |
 | A filter returns nothing | Clear it, check the quotes (single quotes inside) and the time range (top right, set it to "Last 7 days") | Traces older than the time range are hidden |
 | Compare page looks empty | Check the **experiment** dropdown (top left) and clear the filter box | |
 | Accidentally clicked delete | Experiments are gone; show the scoreboard slide instead | `make exp-v1 exp-v2` re-creates the Sol ones (about 10 min, about $1.30) |
@@ -498,6 +550,7 @@ show it and cancel**.
 | Purpose | Command |
 |---|---|
 | Start Phoenix | `make phoenix` |
+| Open the diagram deck | `make diagrams` (then → / ← / F / Home) |
 | Live chat (main) | `make chat` |
 | Live chat (backup endpoint) | `make chat-librechat` |
 | Chat as another customer | `uv run python -m scripts.chat --provider openrouter --customer C004 --debug` |

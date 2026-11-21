@@ -1,4 +1,4 @@
-.PHONY: phoenix setup chat chat-librechat smoke exp-v1 exp-v2 exp-librechat traffic eval-prod demo sync-dataset
+.PHONY: phoenix setup chat chat-librechat smoke exp-v1 exp-v2 exp-librechat traffic eval-prod demo sync-dataset diagrams
 
 phoenix:          ## start Phoenix UI + collector on http://localhost:6006
 	uv run phoenix serve
@@ -35,3 +35,6 @@ sync-dataset:     ## re-upload evals/dataset.py to Phoenix (DELETES the dataset'
 	uv run python -m evals.run_experiment --provider openrouter --prompt v2 --code-only --recreate-dataset --name "dataset-sync check"
 
 demo: exp-v1 exp-v2 traffic eval-prod   ## (run `make setup` once beforehand)
+
+diagrams:         ## open the presentation diagram deck (docs/diagrams.html) on http://localhost:8765
+	@(sleep 1; open http://localhost:8765/diagrams.html) & python3 -m http.server 8765 --directory docs

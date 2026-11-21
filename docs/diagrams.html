@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nova Diagram Deck</title>
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1c1c22; --muted: #62626e; --card: #f4f4f7; --border: #dcdce3;
+    --accent: #6d4aff; --ok: #12a150; --bad: #d92d3a;
+    --k-agent: #6d4aff; --k-guard: #d6409f; --k-chain: #2f7ae5; --k-llm: #e08a00; --k-tool: #0f9f6e;
+    --k-http: #8a94a6; --k-retr: #0c9aa6; --k-embed: #8b5cf6; --k-rerank: #3aa53a;
+    --font: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #101218; --fg: #e9e9f0; --muted: #a0a0ae; --card: #1a1d26; --border: #2e3340;
+      --accent: #9b85ff; --ok: #3ccf7c; --bad: #ff5d68;
+      --k-agent: #9b85ff; --k-guard: #ef6cbc; --k-chain: #5b9cff; --k-llm: #ffb23e; --k-tool: #35d29a;
+      --k-http: #9aa3b5; --k-retr: #39c7d2; --k-embed: #b394ff; --k-rerank: #6fd36f;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #101218; --fg: #e9e9f0; --muted: #a0a0ae; --card: #1a1d26; --border: #2e3340;
+    --accent: #9b85ff; --ok: #3ccf7c; --bad: #ff5d68;
+    --k-agent: #9b85ff; --k-guard: #ef6cbc; --k-chain: #5b9cff; --k-llm: #ffb23e; --k-tool: #35d29a;
+    --k-http: #9aa3b5; --k-retr: #39c7d2; --k-embed: #b394ff; --k-rerank: #6fd36f;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); }
+  main { height: 100vh; overflow-y: auto; scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+  section.slide {
+    min-height: 100vh; scroll-snap-align: start; padding: 30px 56px 56px;
+    display: flex; flex-direction: column; gap: 14px; border-bottom: 1px solid var(--border);
+  }
+  .eyebrow { font-size: 14px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+  h1 { font-size: 44px; line-height: 1.1; margin: 0; }
+  h2 { font-size: 34px; line-height: 1.15; margin: 0; }
+  .lede { font-size: 20px; color: var(--muted); margin: 0; max-width: 1100px; line-height: 1.45; }
+  .diagram { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; }
+  .diagram .rendered { width: 100%; display: flex; justify-content: center; }
+  .diagram svg { width: 100%; max-width: 100% !important; height: auto; max-height: calc(100vh - 230px); }
+  .fallback { white-space: pre-wrap; font-family: var(--mono); font-size: 13px; color: var(--muted);
+              background: var(--card); border: 1px dashed var(--border); padding: 16px; border-radius: 10px; width: 100%; }
+  .fallback::before { content: "Diagram renderer couldn't load (offline?). Source shown instead:\A\A"; color: var(--bad); }
+  code, .mono { font-family: var(--mono); }
+
+  /* title slide */
+  .title-wrap { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 28px; max-width: 1150px; }
+  .title-wrap h1 { font-size: 60px; }
+  .takeaways { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; }
+  .card .num { font-size: 15px; font-weight: 700; color: var(--accent); }
+  .card h3 { margin: 6px 0 8px; font-size: 22px; }
+  .card p { margin: 0; color: var(--muted); font-size: 17px; line-height: 1.45; }
+  .stats { display: flex; flex-wrap: wrap; gap: 12px; }
+  .stat { border: 1px solid var(--border); border-radius: 999px; padding: 8px 16px; font-size: 16px; }
+  .stat b { color: var(--accent); }
+
+  /* waterfall */
+  .wf { width: 100%; max-width: 1400px; margin: 0 auto; font-size: 14px; }
+  .wf-row { display: grid; grid-template-columns: 360px 1fr; align-items: center; height: 21px; }
+  .wf-row:nth-child(even) { background: color-mix(in srgb, var(--card) 70%, transparent); }
+  .wf-label { display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; }
+  .badge { font-size: 10px; font-weight: 700; letter-spacing: .04em; border-radius: 4px; padding: 1px 5px;
+           color: var(--bg); min-width: 66px; text-align: center; }
+  .wf-track { position: relative; height: 100%; border-left: 1px solid var(--border); }
+  .bar { position: absolute; top: 4px; height: 14px; border-radius: 3px; min-width: 3px; }
+  .bar.err { background: repeating-linear-gradient(45deg, var(--bad), var(--bad) 5px, transparent 5px, transparent 9px) !important;
+             outline: 2px solid var(--bad); }
+  .bar-time { position: absolute; top: 3px; font-size: 11px; color: var(--muted); white-space: nowrap; }
+  .wf-axis { display: grid; grid-template-columns: 360px 1fr; margin-top: 6px; color: var(--muted); font-size: 12px; }
+  .ticks { position: relative; height: 16px; }
+  .ticks span { position: absolute; transform: translateX(-50%); }
+  .callouts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; max-width: 1400px; margin: 4px auto 0; width: 100%; }
+  .callout { border-left: 4px solid var(--accent); background: var(--card); padding: 10px 14px; border-radius: 8px; font-size: 16px; line-height: 1.4; }
+  .callout b { display: block; font-size: 22px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; font-size: 13px; color: var(--muted); }
+  .legend .badge { min-width: 0; }
+
+  /* scoreboard */
+  .board-wrap { display: grid; grid-template-columns: 1.25fr 1fr; gap: 28px; align-items: start; flex: 1; }
+  table.board { border-collapse: collapse; width: 100%; font-size: 18px; }
+  table.board th, table.board td { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: right; }
+  table.board th:first-child, table.board td:first-child { text-align: left; }
+  table.board thead th { font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  table.board .grp td { font-size: 13px; color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; border-bottom: none; padding-top: 16px; }
+  table.board td.best { font-weight: 800; color: var(--ok); }
+  table.board td.low { font-weight: 800; color: var(--bad); }
+  .note { color: var(--muted); font-size: 14px; margin-top: 8px; }
+  .stories { display: flex; flex-direction: column; gap: 14px; }
+  .story { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; }
+  .story .tag { font-weight: 800; color: var(--accent); font-size: 14px; letter-spacing: .06em; }
+  .story h3 { margin: 4px 0 6px; font-size: 21px; }
+  .story p { margin: 0; color: var(--muted); font-size: 16px; line-height: 1.45; }
+
+  /* chrome */
+  .hud { position: fixed; right: 18px; bottom: 14px; display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); }
+  .hud button { background: var(--card); color: var(--fg); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; cursor: pointer; font: inherit; }
+  .hud button:hover { border-color: var(--accent); }
+  @media (max-width: 900px) {
+    section.slide { padding: 24px 16px 64px; }
+    h1, .title-wrap h1 { font-size: 34px; } h2 { font-size: 26px; }
+    .takeaways, .callouts, .board-wrap { grid-template-columns: 1fr; }
+    .wf-row, .wf-axis { grid-template-columns: 150px 1fr; }
+    .wf { font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+<main id="deck">
+
+<!-- 0 · Title -->
+<section class="slide" id="s-title">
+  <div class="title-wrap">
+    <div class="eyebrow">ShopNova · Customer-support AI agent</div>
+    <h1>See it, measure it, improve it:<br>tracing &amp; evals with Arize Phoenix</h1>
+    <div class="takeaways">
+      <div class="card"><div class="num">01</div><h3>Trace everything</h3><p>Every LLM call, tool call, retrieval and guardrail becomes a span you can inspect.</p></div>
+      <div class="card"><div class="num">02</div><h3>Code evals, then judges</h3><p>Deterministic checks catch the scary failures cheaply; LLM judges catch the subtle ones.</p></div>
+      <div class="card"><div class="num">03</div><h3>Every change is an experiment</h3><p>Prompt, tools, model: each one moved a metric in a direction we didn't predict.</p></div>
+    </div>
+    <div class="stats">
+      <span class="stat"><b>16</b> tools</span><span class="stat"><b>9</b> span kinds</span>
+      <span class="stat"><b>34</b> golden cases</span><span class="stat"><b>9</b> evaluators</span>
+      <span class="stat"><b>4</b> experiments compared</span><span class="stat">GPT-6.2 Sol via OpenRouter</span>
+    </div>
+  </div>
+</section>
+
+<!-- 1 · Architecture -->
+<section class="slide" id="s-arch">
+  <div class="eyebrow">Architecture</div>
+  <h2>What happens when a customer sends a message</h2>
+  <p class="lede">Five stages, each traced. The agent loop lets the model call any of 16 tools, which talk to simulated backend services. Every box sends OpenTelemetry spans to Phoenix.</p>
+  <div class="diagram"><pre class="mermaid-src">
+flowchart LR
+  subgraph PIPE["Agent pipeline · every box becomes a span"]
+    direction TB
+    C(["Customer message"]):::io --> IG["Input guardrail&lt;br/&gt;redact card numbers · flag prompt injection"]:::guard
+    IG --> TR["Triage LLM&lt;br/&gt;intent · sentiment · urgency"]:::llm
+    TR --> AG{{"Agent loop · GPT-6.2 Sol&lt;br/&gt;decides which tools to call"}}:::agent
+    AG -- "tool_calls" --> TL["16 tools"]:::tool
+    TL -- "results" --> AG
+    TL --> SV[("Simulated services&lt;br/&gt;orders · payments · CRM&lt;br/&gt;inventory · 5 carriers")]:::svc
+    TL --> KB[("Policy knowledge base&lt;br/&gt;embed → retrieve → rerank")]:::svc
+    AG --> OG["Output guardrail&lt;br/&gt;blocks other customers' data"]:::guard
+    OG --> R(["Reply to customer"]):::io
+    OG --> CN["CRM-note LLM&lt;br/&gt;summary for the human team"]:::llm
+  end
+  subgraph PX["Arize Phoenix"]
+    direction TB
+    P1["Traces and sessions"]:::px ~~~ P2["Datasets and experiments"]:::px ~~~ P3["Annotations&lt;br/&gt;from online evals"]:::px ~~~ P4["Prompt versions"]:::px
+  end
+  PIPE == "OpenTelemetry spans" ==> PX
+  </pre></div>
+</section>
+
+<!-- 2 · Sequence -->
+<section class="slide" id="s-seq">
+  <div class="eyebrow">One message, step by step</div>
+  <h2>"Where is my standing desk? This is the third time I'm asking."</h2>
+  <p class="lede">The live-demo conversation. The model asks for two tools at once, so they run in parallel; the DHL API times out once and the retry succeeds.</p>
+  <div class="diagram"><pre class="mermaid-src">
+sequenceDiagram
+  actor U as Customer (Emma)
+  participant A as Agent pipeline
+  participant L as GPT-6.2 Sol
+  participant T as Tools / services
+  U->>A: Where is my desk? 3rd time asking
+  Note over A: input guardrail ✓ · triage LLM: intent, sentiment
+  A->>L: conversation + 16 tool schemas
+  L-->>A: 2 tool_calls at once
+  par in parallel
+    A->>T: get_customer_profile
+  and
+    A->>T: get_ticket_history (2 earlier tickets)
+  end
+  L-->>A: tool_call lookup_order
+  A->>T: lookup_order (shipped, DHL)
+  L-->>A: tool_call track_shipment
+  A->>T: track_shipment
+  Note over T: DHL API: 504 timeout (2.4 s) → retry → 200
+  T-->>A: scans: customs, Stockholm · ETA Nov 24
+  L-->>A: final reply
+  Note over A: output guardrail ✓ · CRM-note LLM
+  A-->>U: Sorry you had to ask 3 times… ETA Nov 24
+  </pre></div>
+</section>
+
+<!-- 3 · Waterfall -->
+<section class="slide" id="s-wf">
+  <div class="eyebrow">Anatomy of a trace (real timings)</div>
+  <h2>23 spans, 14 seconds: where did the time go?</h2>
+  <p class="lede">The actual trace of the live-demo message, drawn as a waterfall. Each row is one span; bars show when it started and how long it took.</p>
+  <div class="wf" id="waterfall"></div>
+  <div class="legend" id="legend"></div>
+  <div class="callouts">
+    <div class="callout" style="border-color: var(--k-llm)"><b>10.3 s of 14.0 s</b>is spent inside 6 LLM calls (74%). Tools and services take about 1 s.</div>
+    <div class="callout" style="border-color: var(--bad)"><b>2.4 s wasted</b>by the DHL API timing out (504) before the retry succeeded. Invisible without tracing.</div>
+    <div class="callout" style="border-color: var(--k-tool)"><b>2 tools in parallel</b>at 4.03 s: the model asked for both in a single step, so they ran concurrently.</div>
+  </div>
+</section>
+
+<!-- 4 · Tools map -->
+<section class="slide" id="s-tools">
+  <div class="eyebrow">Tools and services</div>
+  <h2>16 tools, grouped by what they touch</h2>
+  <p class="lede">Each tool call becomes a TOOL span with HTTP spans underneath. The backend enforces some rules (refund cap, cancel only while processing); others, like order ownership, are left to the agent, which makes them something to evaluate.</p>
+  <div class="diagram"><pre class="mermaid-src">
+flowchart TB
+  subgraph ACC["Customer"]
+    direction TB
+    t1["get_customer_profile"]:::tool ~~~ t2["get_ticket_history"]:::tool ~~~ t3["get_loyalty_account"]:::tool
+  end
+  subgraph ORD["Orders"]
+    direction TB
+    t4["lookup_order"]:::tool ~~~ t5["check_return_eligibility"]:::tool ~~~ t6["cancel_order"]:::tool ~~~ t7["update_shipping_address"]:::tool ~~~ t8["create_replacement_order"]:::tool
+  end
+  subgraph MON["Money and shipping"]
+    direction TB
+    t9["issue_refund · max $200"]:::tool ~~~ t10["get_payment_status"]:::tool ~~~ t11["track_shipment"]:::tool
+  end
+  subgraph CAT["Catalog"]
+    direction TB
+    t12["search_products"]:::tool ~~~ t13["check_inventory"]:::tool ~~~ t14["get_active_promotions"]:::tool
+  end
+  subgraph KNW["Knowledge and humans"]
+    direction TB
+    t15["search_policy"]:::tool ~~~ t16["escalate_to_human"]:::tool
+  end
+  subgraph SVC["Simulated backend services (each call = an HTTP span)"]
+    direction LR
+    CRM[("CRM + helpdesk")]:::svc
+    OMS[("Order management&lt;br/&gt;+ address validation")]:::svc
+    PAY[("Payments")]:::svc
+    CAR[("5 carrier APIs&lt;br/&gt;DHL + Royal Mail flaky")]:::bad
+    INV[("Inventory, catalog&lt;br/&gt;+ promotions")]:::svc
+    VKB[("Vector KB")]:::svc
+    CRM ~~~ OMS ~~~ PAY ~~~ CAR ~~~ INV ~~~ VKB
+  end
+  ACC --> SVC
+  ORD --> SVC
+  MON --> SVC
+  CAT --> SVC
+  KNW --> SVC
+  </pre></div>
+</section>
+
+<!-- 5 · Offline evals -->
+<section class="slide" id="s-offline">
+  <div class="eyebrow">Offline evals</div>
+  <h2>How an experiment scores the agent</h2>
+  <p class="lede">The same 34 hand-written cases run against every version of the agent. Each answer is scored by 6 code checks and 3 LLM judges, and Phoenix stores every score, explanation and trace.</p>
+  <div class="diagram"><pre class="mermaid-src">
+flowchart TB
+  subgraph IN["1 · Test cases"]
+    direction LR
+    DS[("Golden dataset&lt;br/&gt;34 cases · 7 categories")]:::data --- CASE["Each case defines: reference answer · expected / forbidden tools&lt;br/&gt;should_escalate · must / must-not mention"]:::note
+  end
+  subgraph RUNS["2 · Run and score every case"]
+    direction LR
+    RUN["Run the agent"]:::agent --> OUT["Answer +&lt;br/&gt;full trace"]:::io
+    OUT --> CODE["6 code evaluators&lt;br/&gt;tool_recall · forbidden_tools · escalation&lt;br/&gt;key_facts · privacy_guard · protocol"]:::tool
+    OUT --> JUDGE["3 LLM judges&lt;br/&gt;correctness · groundedness · tone"]:::llm
+  end
+  subgraph DEC["3 · Decide"]
+    direction LR
+    EXP["Phoenix experiment&lt;br/&gt;score + explanation per case"]:::px --> CMP{{"Compare versions&lt;br/&gt;v1 vs v2 · LibreChat vs Sol"}}:::agent
+    CMP -- "better on every slice" --> SHIP(["Ship"]):::good
+    CMP -- "a slice got worse" --> FIX(["Fix and re-run"]):::bad
+  end
+  IN --> RUNS --> DEC
+  </pre></div>
+</section>
+
+<!-- 6 · Results -->
+<section class="slide" id="s-results">
+  <div class="eyebrow">Results</div>
+  <h2>4 experiments, 3 stories</h2>
+  <div class="board-wrap">
+    <div>
+      <table class="board">
+        <thead><tr><th>Evaluator</th><th>LibreChat v1</th><th>LibreChat v2</th><th>Sol v1</th><th>Sol v2</th></tr></thead>
+        <tbody>
+          <tr class="grp"><td colspan="5">Code checks</td></tr>
+          <tr><td>tool_recall</td><td>0.91</td><td class="best">1.00</td><td>0.97</td><td class="best">1.00</td></tr>
+          <tr><td>escalation</td><td>0.94</td><td class="best">1.00</td><td>0.94</td><td class="best">1.00</td></tr>
+          <tr><td>key_facts</td><td>0.94</td><td class="best">1.00</td><td class="best">1.00</td><td class="best">1.00</td></tr>
+          <tr><td>protocol</td><td>0.97</td><td class="best">1.00</td><td class="best">1.00</td><td class="best">1.00</td></tr>
+          <tr><td>forbidden_tools · privacy</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td></tr>
+          <tr class="grp"><td colspan="5">LLM judges</td></tr>
+          <tr><td>correctness</td><td>0.78</td><td>0.82</td><td class="best">0.83</td><td class="low">0.75</td></tr>
+          <tr><td>groundedness</td><td>0.82</td><td class="best">0.94</td><td>0.82</td><td class="best">0.94</td></tr>
+          <tr><td>tone</td><td>0.89</td><td>0.84</td><td class="best">0.96</td><td>0.93</td></tr>
+        </tbody>
+      </table>
+      <p class="note">Each column's judges use that setup's model, so compare LLM-judge scores within a setup. Code checks compare cleanly across all four.</p>
+    </div>
+    <div class="stories">
+      <div class="story"><div class="tag">STORY A</div><h3>The prompt matters</h3><p>Asked for an Amazon scraper, the naive v1 prompt wrote the code. v2 declined. v2 scores 1.00 on every code check on both setups, and groundedness goes 0.82 → 0.94.</p></div>
+      <div class="story"><div class="tag">STORY B</div><h3>Better model ≠ better at everything</h3><p>On GPT-6.2 Sol, v2 scored <em>lower</em> on correctness (0.75 vs 0.83). The judges say its "2–5 sentences" rule makes answers concise but incomplete.</p></div>
+      <div class="story"><div class="tag">STORY C</div><h3>The eval caught my regression</h3><p>Adding 8 tools dropped protocol 1.00 → 0.85. The cause: triage notes placed after the "reply only in JSON" rule. Moving one paragraph fixed it.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 · Closed loop -->
+<section class="slide" id="s-loop">
+  <div class="eyebrow">Online evals and the improvement loop</div>
+  <h2>Production failures become tomorrow's test cases</h2>
+  <p class="lede">Production has no reference answers, so reference-free evals score every traced turn and write annotations back onto the trace. A flagged trace becomes a golden case with one click.</p>
+  <div class="diagram"><pre class="mermaid-src">
+flowchart TB
+  subgraph BEFORE["Before release · offline"]
+    direction LR
+    CH["Change something&lt;br/&gt;prompt · tools · model"]:::agent --> EX["Offline experiment&lt;br/&gt;34 golden cases"]:::px
+    EX --> CP{{"Better on every slice?&lt;br/&gt;no → change again"}}:::agent
+    CP -- "yes" --> SH(["Ship"]):::good
+  end
+  subgraph AFTER["After release · online"]
+    direction LR
+    PR["Production traffic&lt;br/&gt;every turn traced"]:::io --> OE["Online evals&lt;br/&gt;groundedness 0.86 · resolution 0.94&lt;br/&gt;tone 0.96 · privacy 1.00"]:::llm
+    OE --> FL["Flagged trace&lt;br/&gt;e.g. hallucinated"]:::bad
+    FL --> AD["Add to dataset (one click)&lt;br/&gt;↺ becomes a golden case&lt;br/&gt;for the next experiment"]:::data
+  end
+  BEFORE == "ship" ==> AFTER
+  </pre></div>
+</section>
+
+</main>
+
+<div class="hud">
+  <span id="pos">1 / 8</span>
+  <button id="prev" aria-label="Previous slide">◀</button>
+  <button id="next" aria-label="Next slide">▶</button>
+  <button id="theme" aria-label="Toggle light or dark theme">◐</button>
+  <button id="fs" aria-label="Toggle fullscreen">⛶</button>
+</div>
+
+<script>
+// ---------------------------------------------------------------- waterfall (real span timings)
+const TOTAL = 14.043;
+const KINDS = {
+  AGENT: "--k-agent", GUARDRAIL: "--k-guard", CHAIN: "--k-chain", LLM: "--k-llm", TOOL: "--k-tool",
+  HTTP: "--k-http", RETRIEVER: "--k-retr", EMBEDDING: "--k-embed", RERANKER: "--k-rerank",
+};
+// depth | name | kind | start s | end s | error?
+const SPANS = [
+  [0, "support_agent", "AGENT", 0.000, 14.043],
+  [1, "input_guardrail", "GUARDRAIL", 0.000, 0.001],
+  [1, "triage", "CHAIN", 0.000, 2.246],
+  [2, "LLM → triage JSON", "LLM", 0.022, 2.246],
+  [1, "react_loop", "CHAIN", 2.247, 11.572],
+  [2, "LLM → 2 tool calls", "LLM", 2.250, 4.029],
+  [2, "get_customer_profile", "TOOL", 4.030, 4.251],
+  [3, "GET crm", "HTTP", 4.030, 4.140],
+  [3, "GET order-management", "HTTP", 4.141, 4.250],
+  [2, "get_ticket_history", "TOOL", 4.030, 4.279],
+  [3, "GET helpdesk", "HTTP", 4.030, 4.279],
+  [2, "LLM → lookup_order", "LLM", 4.286, 5.913],
+  [2, "lookup_order", "TOOL", 5.914, 5.977],
+  [3, "GET order-management", "HTTP", 5.914, 5.976],
+  [2, "LLM → track_shipment", "LLM", 5.981, 6.991],
+  [2, "track_shipment", "TOOL", 6.991, 10.336],
+  [3, "GET order-management", "HTTP", 6.991, 7.054],
+  [3, "GET carrier-dhl 504", "HTTP", 7.054, 9.441, true],
+  [3, "GET carrier-dhl 200 (retry)", "HTTP", 9.542, 10.336],
+  [2, "LLM → final reply", "LLM", 10.344, 11.572],
+  [1, "output_guardrail", "GUARDRAIL", 11.572, 11.573],
+  [1, "crm_note", "CHAIN", 11.573, 14.043],
+  [2, "LLM → CRM note JSON", "LLM", 11.574, 14.042],
+];
+(function drawWaterfall() {
+  const wf = document.getElementById("waterfall");
+  const pct = s => (s / TOTAL) * 100;
+  for (const [depth, name, kind, s, e, err] of SPANS) {
+    const row = document.createElement("div"); row.className = "wf-row";
+    const label = document.createElement("div"); label.className = "wf-label";
+    label.style.paddingLeft = (depth * 16 + 6) + "px";
+    const badge = document.createElement("span"); badge.className = "badge"; badge.textContent = kind;
+    badge.style.background = `var(${KINDS[kind]})`;
+    const nm = document.createElement("span"); nm.className = "mono"; nm.textContent = name;
+    if (err) nm.style.color = "var(--bad)";
+    label.append(badge, nm);
+    const track = document.createElement("div"); track.className = "wf-track";
+    const bar = document.createElement("div"); bar.className = "bar" + (err ? " err" : "");
+    bar.style.left = pct(s) + "%"; bar.style.width = Math.max(pct(e - s), 0.25) + "%";
+    bar.style.background = `var(${KINDS[kind]})`;
+    bar.title = `${name}: ${(e - s).toFixed(2)} s (starts at ${s.toFixed(2)} s)`;
+    const t = document.createElement("span"); t.className = "bar-time";
+    const dur = e - s; t.textContent = dur < 0.01 ? "<0.01 s" : dur.toFixed(2) + " s";
+    if (pct(e) > 86) { t.style.right = (100 - pct(s) + 0.6) + "%"; } else { t.style.left = (pct(e) + 0.6) + "%"; }
+    track.append(bar, t); row.append(label, track); wf.append(row);
+  }
+  const axis = document.createElement("div"); axis.className = "wf-axis";
+  const ticks = document.createElement("div"); ticks.className = "ticks";
+  for (let s = 0; s <= 14; s += 2) { const sp = document.createElement("span"); sp.style.left = pct(s) + "%"; sp.textContent = s + " s"; ticks.append(sp); }
+  axis.append(document.createElement("div"), ticks); wf.append(axis);
+  const lg = document.getElementById("legend");
+  for (const k of Object.keys(KINDS)) { const b = document.createElement("span"); b.className = "badge"; b.textContent = k; b.style.background = `var(${KINDS[k]})`; lg.append(b); }
+})();
+
+// ---------------------------------------------------------------- navigation
+const deck = document.getElementById("deck");
+const slides = [...document.querySelectorAll("section.slide")];
+const posEl = document.getElementById("pos");
+function current() {
+  const y = deck.scrollTop + deck.clientHeight / 3;
+  let i = 0; slides.forEach((s, j) => { if (s.offsetTop <= y) i = j; }); return i;
+}
+function go(i) { i = Math.max(0, Math.min(slides.length - 1, i)); slides[i].scrollIntoView({ behavior: "smooth" }); }
+deck.addEventListener("scroll", () => { posEl.textContent = `${current() + 1} / ${slides.length}`; });
+document.addEventListener("keydown", e => {
+  if (["ArrowRight", "ArrowDown", "PageDown", " "].includes(e.key)) { e.preventDefault(); go(current() + 1); }
+  if (["ArrowLeft", "ArrowUp", "PageUp"].includes(e.key)) { e.preventDefault(); go(current() - 1); }
+  if (e.key === "Home") go(0);
+  if (e.key === "End") go(slides.length - 1);
+  if (e.key === "f" || e.key === "F") toggleFs();
+});
+document.getElementById("next").onclick = () => go(current() + 1);
+document.getElementById("prev").onclick = () => go(current() - 1);
+function toggleFs() { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); }
+document.getElementById("fs").onclick = toggleFs;
+document.getElementById("theme").onclick = () => {
+  const dark = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() === "#101218";
+  document.documentElement.dataset.theme = dark ? "light" : "dark";
+  renderDiagrams();
+};
+</script>
+
+<script type="module">
+// ---------------------------------------------------------------- Mermaid diagrams, themed from CSS tokens
+let mermaid = null;
+try {
+  mermaid = (await import("https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs")).default;
+} catch (e) { /* offline: the .fallback source view stays visible */ }
+
+const sources = [...document.querySelectorAll("pre.mermaid-src")].map(pre => {
+  const holder = document.createElement("div"); holder.className = "rendered";
+  pre.after(holder);
+  return { pre, holder, src: pre.textContent.trim() };
+});
+sources.forEach(s => { s.pre.classList.add("fallback"); s.pre.style.display = mermaid ? "none" : "block"; });
+
+function tok(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+function classDefs() {
+  const card = tok("--card"), fg = tok("--fg");
+  const def = (n, color) => `classDef ${n} fill:${card},stroke:${color},stroke-width:2.5px,color:${fg}`;
+  return [
+    def("io", tok("--muted")), def("guard", tok("--k-guard")), def("llm", tok("--k-llm")),
+    def("agent", tok("--k-agent")), def("tool", tok("--k-tool")), def("svc", tok("--k-http")),
+    def("px", tok("--accent")), def("data", tok("--k-retr")), def("note", tok("--border")),
+    def("good", tok("--ok")), def("bad", tok("--bad")),
+  ].join("\n");
+}
+
+let n = 0;
+window.renderDiagrams = async function () {
+  if (!mermaid) return;
+  mermaid.initialize({
+    startOnLoad: false, securityLevel: "strict", theme: "base",
+    flowchart: { htmlLabels: true, curve: "basis", padding: 14, nodeSpacing: 34, rankSpacing: 46 },
+    sequence: { mirrorActors: false, actorMargin: 70, messageFontSize: 15, noteFontSize: 14, actorFontSize: 15 },
+    themeVariables: {
+      fontFamily: tok("--font"), fontSize: "17px",
+      background: tok("--bg"), primaryColor: tok("--card"), primaryTextColor: tok("--fg"),
+      primaryBorderColor: tok("--border"), lineColor: tok("--muted"), textColor: tok("--fg"),
+      secondaryColor: tok("--card"), tertiaryColor: tok("--bg"), clusterBkg: tok("--bg"), clusterBorder: tok("--border"),
+      edgeLabelBackground: tok("--bg"), noteBkgColor: tok("--card"), noteTextColor: tok("--fg"), noteBorderColor: tok("--border"),
+      actorBkg: tok("--card"), actorBorder: tok("--accent"), actorTextColor: tok("--fg"), actorLineColor: tok("--border"),
+      signalColor: tok("--fg"), signalTextColor: tok("--fg"), labelBoxBkgColor: tok("--card"), labelTextColor: tok("--fg"),
+      activationBkgColor: tok("--card"), sequenceNumberColor: tok("--bg"),
+    },
+  });
+  for (const s of sources) {
+    const src = s.src.startsWith("flowchart") ? s.src + "\n" + classDefs() : s.src;
+    try {
+      const { svg } = await mermaid.render(`mmd-${n++}`, src);
+      s.holder.innerHTML = svg;
+      s.pre.style.display = "none";
+    } catch (err) {
+      s.pre.style.display = "block";
+      console.error(err);
+    }
+  }
+};
+renderDiagrams();
+</script>
+</body>
+</html>
