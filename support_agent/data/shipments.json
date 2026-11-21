@@ -1,0 +1,30 @@
+{
+  "BD123456789IN": {"carrier": "BlueDart", "status": "in_transit", "estimated_delivery": "2026-11-22", "events": [
+    {"ts": "2026-11-17T10:12", "location": "Mumbai, IN", "event": "Picked up from ShopNova warehouse"},
+    {"ts": "2026-11-18T03:40", "location": "Pune Hub, IN", "event": "In transit"},
+    {"ts": "2026-11-19T21:05", "location": "Bengaluru Hub, IN", "event": "Arrived at destination hub"},
+    {"ts": "2026-11-20T08:30", "location": "Bengaluru Hub, IN", "event": "Delayed: heavy rain, rescheduled for 2026-11-22"}]},
+  "BD987654321IN": {"carrier": "BlueDart", "status": "delivered", "delivered_at": "2026-11-10T14:22", "events": [
+    {"ts": "2026-11-06T09:00", "location": "Mumbai, IN", "event": "Picked up"},
+    {"ts": "2026-11-10T14:22", "location": "Bengaluru, IN", "event": "Delivered: left at front door"}]},
+  "1Z999AA10123456784": {"carrier": "UPS", "status": "delivered", "delivered_at": "2026-09-28T16:40", "events": [
+    {"ts": "2026-09-22T11:00", "location": "Oakland, CA", "event": "Picked up"},
+    {"ts": "2026-09-28T16:40", "location": "San Francisco, CA", "event": "Delivered: front desk"}]},
+  "1Z999AA10123456791": {"carrier": "UPS", "status": "delivered", "delivered_at": "2026-11-12T12:05", "events": [
+    {"ts": "2026-11-08T10:30", "location": "Oakland, CA", "event": "Picked up"},
+    {"ts": "2026-11-12T12:05", "location": "San Francisco, CA", "event": "Delivered: signed by M. CHEN"}]},
+  "RM445566778GB": {"carrier": "Royal Mail", "status": "delivered", "delivered_at": "2026-11-14T11:15", "events": [
+    {"ts": "2026-11-10T08:00", "location": "Coventry, UK", "event": "Picked up"},
+    {"ts": "2026-11-14T11:15", "location": "London, UK", "event": "Delivered: through letterbox"}]},
+  "7489 2231 0098": {"carrier": "FedEx", "status": "delivered", "delivered_at": "2026-11-02T13:50", "events": [
+    {"ts": "2026-10-29T07:20", "location": "Monterrey, MX", "event": "Picked up"},
+    {"ts": "2026-11-02T13:50", "location": "Mexico City, MX", "event": "Delivered: signed by D. RAMIREZ"}]},
+  "7489 2231 0177": {"carrier": "FedEx", "status": "delivered", "delivered_at": "2026-11-18T10:05", "events": [
+    {"ts": "2026-11-15T07:45", "location": "Monterrey, MX", "event": "Picked up"},
+    {"ts": "2026-11-17T22:10", "location": "Mexico City Hub, MX", "event": "Exception: package damaged in transit, noted by driver"},
+    {"ts": "2026-11-18T10:05", "location": "Mexico City, MX", "event": "Delivered: signed by D. RAMIREZ (damage noted)"}]},
+  "JD014600006281234567": {"carrier": "DHL", "status": "in_transit", "estimated_delivery": "2026-11-24", "events": [
+    {"ts": "2026-11-18T15:00", "location": "Hamburg, DE", "event": "Shipment picked up"},
+    {"ts": "2026-11-19T19:30", "location": "Malmö, SE", "event": "Arrived in destination country"},
+    {"ts": "2026-11-20T09:10", "location": "Stockholm, SE", "event": "Customs clearance in progress"}]}
+}

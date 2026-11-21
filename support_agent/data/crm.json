@@ -1,0 +1,25 @@
+{
+  "tickets": [
+    {"ticket_id": "TCK-4102", "customer_id": "C005", "created": "2026-11-18", "channel": "email", "status": "closed",
+     "subject": "Where is my standing desk?", "resolution": "Shared DHL tracking link."},
+    {"ticket_id": "TCK-4188", "customer_id": "C005", "created": "2026-11-19", "channel": "chat", "status": "closed",
+     "subject": "Desk still not delivered", "resolution": "Told customer shipment is in customs; no follow-up scheduled."},
+    {"ticket_id": "TCK-3871", "customer_id": "C002", "created": "2026-10-02", "channel": "phone", "status": "closed",
+     "subject": "Backpack zipper stiff", "resolution": "Advised lubricating zipper; customer satisfied."},
+    {"ticket_id": "TCK-4021", "customer_id": "C004", "created": "2026-11-05", "channel": "chat", "status": "closed",
+     "subject": "Earbuds pairing issue", "resolution": "Factory reset steps shared; issue resolved."}
+  ],
+  "loyalty": {
+    "C001": {"points": 4820, "tier": "plus", "lifetime_spend": 2140.75, "points_expiring": {"amount": 600, "on": "2026-12-31"}},
+    "C002": {"points": 1210, "tier": "standard", "lifetime_spend": 612.40, "points_expiring": null},
+    "C003": {"points": 380, "tier": "standard", "lifetime_spend": 243.00, "points_expiring": null},
+    "C004": {"points": 9150, "tier": "plus", "lifetime_spend": 5320.10, "points_expiring": {"amount": 1500, "on": "2026-11-30"}},
+    "C005": {"points": 640, "tier": "standard", "lifetime_spend": 578.50, "points_expiring": null}
+  },
+  "loyalty_rules": "100 points = $1, redeemable at checkout on new orders (not on existing orders). Plus members earn 2x points, get free express shipping and free returns.",
+  "promotions": [
+    {"id": "PROMO-BF26", "title": "Black Friday Week", "details": "20% off all electronics, automatically applied at checkout on new orders.", "valid_from": "2026-11-20", "valid_to": "2026-11-30"},
+    {"id": "PROMO-HOME", "title": "Cozy Home", "details": "Buy 2 home items, get 10% off the basket.", "valid_from": "2026-11-01", "valid_to": "2026-12-15"},
+    {"id": "PROMO-PLUS", "title": "Plus Member Bonus", "details": "Plus members earn 3x points on all orders this week.", "valid_from": "2026-11-20", "valid_to": "2026-11-27"}
+  ]
+}

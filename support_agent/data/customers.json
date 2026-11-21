@@ -1,0 +1,7 @@
+[
+  {"customer_id": "C001", "name": "Priya Sharma", "email": "priya.sharma@example.com", "phone": "+91-98450-11223", "tier": "plus", "member_since": "2023-04-11"},
+  {"customer_id": "C002", "name": "Marcus Chen", "email": "marcus.chen@example.com", "phone": "+1-415-555-0142", "tier": "standard", "member_since": "2024-08-02"},
+  {"customer_id": "C003", "name": "Aisha Okafor", "email": "aisha.okafor@example.com", "phone": "+44-20-7946-0381", "tier": "standard", "member_since": "2025-01-19"},
+  {"customer_id": "C004", "name": "Diego Ramirez", "email": "diego.ramirez@example.com", "phone": "+52-55-5555-0199", "tier": "plus", "member_since": "2022-11-30"},
+  {"customer_id": "C005", "name": "Emma Lindqvist", "email": "emma.lindqvist@example.com", "phone": "+46-8-555-0177", "tier": "standard", "member_since": "2025-06-07"}
+]

@@ -1,0 +1,93 @@
+[
+  {
+    "order_id": "ORD-1001", "customer_id": "C001", "status": "processing",
+    "order_date": "2026-11-19", "shipping_method": "express",
+    "shipping_address": "12 MG Road, Bengaluru 560001, India",
+    "items": [{"sku": "EAR-200", "name": "Aurora Wireless Earbuds", "category": "electronics", "price": 89.99, "qty": 1, "final_sale": false}],
+    "total": 89.99
+  },
+  {
+    "order_id": "ORD-1002", "customer_id": "C001", "status": "shipped",
+    "order_date": "2026-11-15", "shipped_date": "2026-11-17", "estimated_delivery": "2026-11-22",
+    "carrier": "BlueDart", "tracking_number": "BD123456789IN", "shipping_method": "standard",
+    "shipping_address": "12 MG Road, Bengaluru 560001, India",
+    "items": [{"sku": "FURN-310", "name": "Nimbus Ergonomic Chair", "category": "furniture", "price": 249.00, "qty": 1, "final_sale": false}],
+    "total": 249.00
+  },
+  {
+    "order_id": "ORD-1003", "customer_id": "C001", "status": "delivered",
+    "order_date": "2026-11-04", "shipped_date": "2026-11-06", "delivered_date": "2026-11-10",
+    "carrier": "BlueDart", "tracking_number": "BD987654321IN", "shipping_method": "standard",
+    "shipping_address": "12 MG Road, Bengaluru 560001, India",
+    "items": [
+      {"sku": "HOME-115", "name": "Cotton Throw Blanket", "category": "home", "price": 39.50, "qty": 1, "final_sale": false},
+      {"sku": "HOME-120", "name": "Ceramic Mug Set (4)", "category": "home", "price": 24.00, "qty": 1, "final_sale": false}
+    ],
+    "total": 63.50
+  },
+  {
+    "order_id": "ORD-1004", "customer_id": "C002", "status": "delivered",
+    "order_date": "2026-09-20", "shipped_date": "2026-09-22", "delivered_date": "2026-09-28",
+    "carrier": "UPS", "tracking_number": "1Z999AA10123456784", "shipping_method": "standard",
+    "shipping_address": "500 Market St, San Francisco, CA 94105, USA",
+    "items": [{"sku": "BAG-410", "name": "Trailblazer Backpack", "category": "bags", "price": 74.00, "qty": 1, "final_sale": false}],
+    "total": 74.00
+  },
+  {
+    "order_id": "ORD-1005", "customer_id": "C002", "status": "delivered",
+    "order_date": "2026-11-06", "shipped_date": "2026-11-08", "delivered_date": "2026-11-12",
+    "carrier": "UPS", "tracking_number": "1Z999AA10123456791", "shipping_method": "standard",
+    "shipping_address": "500 Market St, San Francisco, CA 94105, USA",
+    "items": [{"sku": "ELEC-550", "name": "Pulse Smartwatch", "category": "electronics", "price": 329.00, "qty": 1, "final_sale": false}],
+    "total": 329.00
+  },
+  {
+    "order_id": "ORD-1006", "customer_id": "C003", "status": "delivered",
+    "order_date": "2026-11-08", "shipped_date": "2026-11-10", "delivered_date": "2026-11-14",
+    "carrier": "Royal Mail", "tracking_number": "RM445566778GB", "shipping_method": "standard",
+    "shipping_address": "221 Baker St, London NW1 6XE, UK",
+    "items": [{"sku": "APP-220", "name": "Linen Summer Dress (Clearance)", "category": "apparel", "price": 59.00, "qty": 1, "final_sale": true}],
+    "total": 59.00
+  },
+  {
+    "order_id": "ORD-1007", "customer_id": "C003", "status": "processing",
+    "order_date": "2026-11-20", "shipping_method": "standard",
+    "shipping_address": "221 Baker St, London NW1 6XE, UK",
+    "items": [
+      {"sku": "HOME-140", "name": "Bamboo Cutting Board", "category": "home", "price": 29.00, "qty": 1, "final_sale": false},
+      {"sku": "HOME-145", "name": "Damascus Chef Knife", "category": "home", "price": 65.00, "qty": 1, "final_sale": false}
+    ],
+    "total": 94.00
+  },
+  {
+    "order_id": "ORD-1008", "customer_id": "C004", "status": "delivered",
+    "order_date": "2026-10-27", "shipped_date": "2026-10-29", "delivered_date": "2026-11-02",
+    "carrier": "FedEx", "tracking_number": "7489 2231 0098", "shipping_method": "express",
+    "shipping_address": "Av. Reforma 222, Mexico City 06600, Mexico",
+    "items": [{"sku": "EAR-200", "name": "Aurora Wireless Earbuds", "category": "electronics", "price": 89.99, "qty": 1, "final_sale": false}],
+    "total": 89.99
+  },
+  {
+    "order_id": "ORD-1009", "customer_id": "C004", "status": "delivered",
+    "order_date": "2026-11-13", "shipped_date": "2026-11-15", "delivered_date": "2026-11-18",
+    "carrier": "FedEx", "tracking_number": "7489 2231 0177", "shipping_method": "express",
+    "shipping_address": "Av. Reforma 222, Mexico City 06600, Mexico",
+    "items": [{"sku": "HOME-160", "name": "Glass Table Lamp", "category": "home", "price": 45.00, "qty": 1, "final_sale": false}],
+    "total": 45.00
+  },
+  {
+    "order_id": "ORD-1010", "customer_id": "C005", "status": "shipped",
+    "order_date": "2026-11-16", "shipped_date": "2026-11-18", "estimated_delivery": "2026-11-24",
+    "carrier": "DHL", "tracking_number": "JD014600006281234567", "shipping_method": "standard",
+    "shipping_address": "Drottninggatan 50, 111 21 Stockholm, Sweden",
+    "items": [{"sku": "FURN-400", "name": "Elevate Standing Desk", "category": "furniture", "price": 499.00, "qty": 1, "final_sale": false}],
+    "total": 499.00
+  },
+  {
+    "order_id": "ORD-1011", "customer_id": "C005", "status": "cancelled",
+    "order_date": "2026-11-01", "cancelled_date": "2026-11-01", "shipping_method": "standard",
+    "shipping_address": "Drottninggatan 50, 111 21 Stockholm, Sweden",
+    "items": [{"sku": "HOME-115", "name": "Cotton Throw Blanket", "category": "home", "price": 39.50, "qty": 1, "final_sale": false}],
+    "total": 39.50
+  }
+]

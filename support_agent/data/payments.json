@@ -1,0 +1,16 @@
+{
+  "ORD-1001": {"method": "Visa ending 4242", "captured": 89.99, "status": "captured", "refunds": []},
+  "ORD-1002": {"method": "UPI (priya@okbank)", "captured": 249.00, "status": "captured", "refunds": []},
+  "ORD-1003": {"method": "Visa ending 4242", "captured": 63.50, "status": "captured", "refunds": []},
+  "ORD-1004": {"method": "Amex ending 1007", "captured": 74.00, "status": "captured", "refunds": []},
+  "ORD-1005": {"method": "Amex ending 1007", "captured": 329.00, "status": "captured", "refunds": []},
+  "ORD-1006": {"method": "PayPal", "captured": 59.00, "status": "captured", "refunds": []},
+  "ORD-1007": {"method": "Mastercard ending 8890", "captured": 94.00, "status": "authorized", "refunds": []},
+  "ORD-1008": {"method": "Visa ending 3311", "captured": 89.99, "status": "captured", "refunds": []},
+  "ORD-1009": {"method": "Visa ending 3311", "captured": 45.00, "status": "captured", "refunds": []},
+  "ORD-1010": {"method": "Klarna (pay in 3)", "captured": 166.33, "status": "partially_captured",
+               "note": "Klarna instalment 1 of 3 captured; remaining 2 instalments due 2026-12-16 and 2027-01-16", "refunds": []},
+  "ORD-1011": {"method": "Mastercard ending 5544", "captured": 39.50, "status": "refunded",
+               "refunds": [{"refund_id": "RF-8812", "amount": 39.50, "reason": "order cancelled", "status": "completed",
+                            "initiated": "2026-11-01", "completed": "2026-11-03"}]}
+}

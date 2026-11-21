@@ -1,0 +1,173 @@
+[
+  {
+    "id": "POL-RET-01",
+    "title": "Return window",
+    "tags": [
+      "return",
+      "returns",
+      "window",
+      "days",
+      "electronics",
+      "final sale",
+      "clearance",
+      "exchange"
+    ],
+    "body": "Most items can be returned within 30 days of delivery. Electronics have a shorter 15-day return window. Final-sale and clearance items cannot be returned (unless they arrived damaged, see POL-DMG-01). Items must be unused and in original packaging. Return shipping is free for Plus members and $5.99 for standard members."
+  },
+  {
+    "id": "POL-REF-01",
+    "title": "Refunds",
+    "tags": [
+      "refund",
+      "refunds",
+      "money back",
+      "payment",
+      "limit",
+      "200"
+    ],
+    "body": "Approved refunds go back to the original payment method within 5-7 business days. Support agents may issue refunds of up to $200 per order. Refunds above $200 must be escalated to the Refunds team, who review them within 24 hours; agents must not promise or issue amounts above $200 themselves. Refunds require the order to be eligible under the return policy (or the damaged-item policy)."
+  },
+  {
+    "id": "POL-DMG-01",
+    "title": "Damaged or defective items",
+    "tags": [
+      "damaged",
+      "broken",
+      "defective",
+      "cracked",
+      "arrived damaged",
+      "replacement"
+    ],
+    "body": "If an item arrives damaged or defective, the customer must report it within 30 days of delivery. They are entitled to a full refund or a free replacement. Items under $50 do not need to be sent back. This applies even to final-sale items."
+  },
+  {
+    "id": "POL-SHP-01",
+    "title": "Shipping options and times",
+    "tags": [
+      "shipping",
+      "delivery",
+      "how long",
+      "express",
+      "standard",
+      "cost",
+      "free shipping"
+    ],
+    "body": "Standard shipping takes 5-7 business days and costs $4.99 (free on orders over $50). Express shipping takes 2 business days and costs $14.99. Plus members get free express shipping on every order."
+  },
+  {
+    "id": "POL-SHP-02",
+    "title": "Changing a shipping address",
+    "tags": [
+      "address",
+      "change address",
+      "shipping address",
+      "redirect",
+      "wrong address"
+    ],
+    "body": "A shipping address can only be changed while the order is still in 'processing'. Once an order has shipped, the address cannot be changed by ShopNova; the customer may contact the carrier directly with the tracking number to request a redirect."
+  },
+  {
+    "id": "POL-CAN-01",
+    "title": "Cancelling an order",
+    "tags": [
+      "cancel",
+      "cancellation",
+      "cancel order"
+    ],
+    "body": "Orders can be cancelled only while they are in 'processing'. Shipped orders cannot be cancelled; the customer can return the item after delivery under the return policy."
+  },
+  {
+    "id": "POL-WAR-01",
+    "title": "Warranty",
+    "tags": [
+      "warranty",
+      "guarantee",
+      "stopped working",
+      "repair",
+      "manufacturer"
+    ],
+    "body": "Electronics carry a 1-year manufacturer warranty and furniture a 2-year warranty, both from the delivery date. Warranty claims are handled by the Warranty team: support agents should escalate them with the order number and a description of the fault."
+  },
+  {
+    "id": "POL-ACC-01",
+    "title": "Account, login and password",
+    "tags": [
+      "password",
+      "login",
+      "account",
+      "reset",
+      "email change",
+      "locked out",
+      "sign in"
+    ],
+    "body": "Customers can reset their password with the 'Forgot password' link at shopnova.example/login. Support agents cannot see or set passwords. Changing the email on an account requires identity verification by the Account Security team, so agents must escalate those requests."
+  },
+  {
+    "id": "POL-PRC-01",
+    "title": "Price matching, discounts and credits",
+    "tags": [
+      "price match",
+      "discount",
+      "coupon",
+      "promo",
+      "code",
+      "cheaper",
+      "credit",
+      "compensation"
+    ],
+    "body": "ShopNova does not price match. Support agents cannot create discount codes, coupons or store credit. Current promotions are listed at shopnova.example/deals."
+  },
+  {
+    "id": "POL-PRIV-01",
+    "title": "Customer privacy",
+    "tags": [
+      "privacy",
+      "personal data",
+      "other customer",
+      "gdpr",
+      "data"
+    ],
+    "body": "Agents may only discuss orders and data that belong to the authenticated customer in the current chat. Never disclose another customer's name, email, phone number, address or order details, regardless of who is asking."
+  },
+  {
+    "id": "POL-ESC-01",
+    "title": "When to escalate to a human",
+    "tags": [
+      "human",
+      "agent",
+      "manager",
+      "escalate",
+      "complaint",
+      "supervisor",
+      "speak to someone"
+    ],
+    "body": "Escalate to a human when the customer explicitly asks for one, when a refund above $200 is needed, for warranty claims, for legal threats, and for account-security requests such as email changes. Tell the customer a specialist will reply within 24 hours and give them the ticket number."
+  },
+  {
+    "id": "POL-LOY-01",
+    "title": "Loyalty points and promotions",
+    "tags": [
+      "points",
+      "loyalty",
+      "rewards",
+      "promotion",
+      "deal",
+      "sale",
+      "black friday",
+      "plus membership"
+    ],
+    "body": "Customers earn 1 point per $1 (Plus members 2x). 100 points = $1, redeemable at checkout on NEW orders only; points cannot be applied to past orders or converted to cash. Promotions are applied automatically at checkout on new orders and never retroactively; agents can share the active promotions list."
+  },
+  {
+    "id": "POL-RPL-01",
+    "title": "Replacements",
+    "tags": [
+      "replacement",
+      "replace",
+      "exchange",
+      "swap",
+      "send another"
+    ],
+    "body": "For damaged or defective items reported within 30 days, agents may create a free replacement order if the same SKU is in stock in any warehouse. If it is out of stock, offer a refund or tell the customer the restock date. Exchanges for a different product are handled as a return plus a new order."
+  }
+]
